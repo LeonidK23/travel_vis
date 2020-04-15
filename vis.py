@@ -34,31 +34,35 @@ for flight in flights:
     flight += [city_coords[dep], city_coords[dest]]
 
 # draw map of europe
-fig = plt.figure(num=None, figsize=(8, 8))
-m = Basemap(projection='merc', llcrnrlat=30, urcrnrlat=70, llcrnrlon=-13, urcrnrlon=42, resolution='l')
+fig = plt.figure(num=None, figsize=(6, 6))
+m = Basemap(projection='merc', llcrnrlat=30, urcrnrlat=70, llcrnrlon=-13, urcrnrlon=42, resolution='i')
 m.drawcoastlines(linewidth=0.4)
 m.fillcontinents(color='darkgrey',lake_color='dimgrey')
 m.drawcountries()
 m.drawmapboundary(fill_color='dimgrey')
 
+all_x = []
+all_y = []
+len_line = 0
+
 for flight in flights:
     dep_lat, dep_lon = flight[2]
     dest_lat, dest_lon = flight[3]
-    m.drawgreatcircle(dep_lon, dep_lat, dest_lon, dest_lat, color='yellow', linewidth=0.5)
+    # get coordinates of lines
+    line, = m.drawgreatcircle(dep_lon, dep_lat, dest_lon, dest_lat, color='yellow', linewidth=0.5)
+    x, y = line.get_data()
+    len_line = len(x)
+    all_x = all_x + list(x)
+    all_y = all_y + list(y)
 
-# --------animation part---------
-# line, = m.drawgreatcircle(belon, belat, lonlon, lonlat, color='yellow', linewidth=0.5)
-# x, y = line.get_data()
-#
-# line.remove()
-#
-# line, = plt.plot([], [])
-# def update(i):
-#     line.set_data(x[:i], y[:i])
-#
-# ani = matplotlib.animation.FuncAnimation(fig, update, frames=len(x) + 1, interval=200, repeat=False)
-#
-# --------------------------------
+    line.remove()
+
+def update(i):
+    line.set_data(all_x[:i], all_y[:i])
+
+line, = plt.plot([],[], color='yellow', linewidth=0.5)
+ani = matplotlib.animation.FuncAnimation(fig, update, frames=len(all_x) + 1, interval=100, repeat=False)
 plt.tight_layout()
-plt.savefig("static_2d.png", bbox_inches="tight")
-# plt.show()
+# ani.save("travels.gif", writer="imagemagick", fps=10)
+# plt.savefig("static_2d.png", bbox_inches="tight")
+plt.show()
